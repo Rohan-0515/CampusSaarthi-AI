@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CampusSaarthi AI | College Notice Decoder & Action Plan</title>
+  <meta name="description" content="Decodes complex Indian college circulars and university notices into simple, actionable checklists, deadlines, and Next Steps in Simple English & Hinglish.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Header / Navigation -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand">
+        <div class="brand-icon" aria-hidden="true">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+            <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+          </svg>
+        </div>
+        <div>
+          <div class="brand-title-wrap">
+            <h1 class="brand-title">CampusSaarthi <span class="brand-badge-ai">AI</span></h1>
+            <span class="track-tag">Education &amp; Student Life Track</span>
+          </div>
+          <p class="brand-tagline">Simplifying complex Indian college notices into zero-miss action plans</p>
+        </div>
+      </div>
+      
+      <div class="header-badges">
+        <div id="api-status-badge" class="safety-badge" title="Backend connection and Gemini status">
+          <span id="api-status-dot" class="badge-dot"></span>
+          <span id="api-status-text">Client-Side Heuristic (Demo)</span>
+        </div>
+        <div class="anti-hallucination-badge" title="We only extract facts mentioned in the notice without guessing.">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <span>Fact-Checked Guardrails</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Layout -->
+  <main class="main-layout">
+    <!-- Notice Input Section (Left or Top) -->
+    <section class="panel input-panel" aria-labelledby="input-heading">
+      <div class="panel-header">
+        <div class="panel-header-title">
+          <div class="icon-circle icon-circle-primary">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          </div>
+          <div>
+            <h2 id="input-heading" class="panel-title">Paste College Notice</h2>
+            <p class="panel-desc">Paste circular text, email announcement, or exam notification</p>
+          </div>
+        </div>
+
+        <!-- Sample Notice Dropdown / Trigger -->
+        <div class="sample-picker-container">
+          <label for="sample-select" class="sample-label">Try realistic sample:</label>
+          <div class="sample-button-group">
+            <select id="sample-select" class="custom-select" aria-label="Select sample college notice">
+              <option value="exam">1. Semester Exam &amp; Late Fee Schedule (AKTU/VTU)</option>
+              <option value="scholarship">2. Post-Matric NSP Scholarship Circular</option>
+              <option value="placement">3. TPO Campus Placement Drive (TCS/Infosys)</option>
+            </select>
+            <button id="btn-load-sample" type="button" class="btn btn-secondary btn-sm" title="Load selected sample notice into editor">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              <span>Load Sample</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Textarea form -->
+      <form id="notice-form" class="notice-form" onsubmit="return false;">
+        <div class="textarea-wrapper">
+          <textarea
+            id="notice-input"
+            name="notice-text"
+            rows="12"
+            placeholder="Paste university or college circular here... (e.g., 'Ref No: AKTU/RO/2026/894 - Subject: Submission of Examination Forms for Odd Semester 2026-27...')"
+            aria-label="College notice text to analyze"
+            spellcheck="false"
+          ></textarea>
+          
+          <div class="textarea-footer">
+            <div class="text-stats">
+              <span id="char-count">0 characters</span>
+              <span class="stats-divider">•</span>
+              <span id="word-count">0 words</span>
+            </div>
+            <button type="button" id="btn-clear" class="btn-text" title="Clear text area">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+              Clear
+            </button>
+          </div>
+        </div>
+
+        <!-- Controls Row: Language Switch & Analyze Button -->
+        <div class="controls-row">
+          <div class="language-selector-group">
+            <span class="control-label">Output Language:</span>
+            <div class="segmented-control" role="radiogroup" aria-label="Output Language Selection">
+              <input type="radio" id="lang-english" name="output-lang" value="english" checked>
+              <label for="lang-english" class="segment-btn">
+                <span class="lang-flag">🇬🇧</span>
+                <span>Simple English</span>
+              </label>
+
+              <input type="radio" id="lang-hinglish" name="output-lang" value="hinglish">
+              <label for="lang-hinglish" class="segment-btn">
+                <span class="lang-flag">🇮🇳</span>
+                <span>Hinglish</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="action-buttons">
+            <button id="btn-analyze" type="button" class="btn btn-primary btn-analyze">
+              <svg class="btn-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72Z"/><path d="m14 7 3 3"/><path d="M5 6v4"/><path d="M19 14v4"/><path d="M10 2v2"/><path d="M7 8H3"/><path d="M21 16h-4"/><path d="M11 3H9"/></svg>
+              <span>Analyze Notice</span>
+              <kbd class="kbd-shortcut">Ctrl+↵</kbd>
+            </button>
+          </div>
+        </div>
+      </form>
+
+      <!-- Transparency notice card -->
+      <div class="transparency-note">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <p>
+          <strong>Security &amp; Architecture:</strong> Prepared for official Google Gemini API (Gemini 2.5 Flash) via a secure Node.js backend. API keys are strictly kept on the server and never exposed in the browser. Supports client-side demo fallback.
+        </p>
+      </div>
+    </section>
+
+    <!-- Results Section (Right or Bottom) -->
+    <section class="panel results-panel" aria-labelledby="results-heading" aria-live="polite">
+      <!-- Empty State -->
+      <div id="state-empty" class="state-container state-empty">
+        <div class="empty-illustration" aria-hidden="true">
+          <div class="pulse-ring"></div>
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><circle cx="12" cy="14" r="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+        </div>
+        <h3 id="results-heading" class="state-title">Ready to Decode Your Notice</h3>
+        <p class="state-text">Paste a long university circular on the left or try our realistic samples to get an actionable breakdown in seconds.</p>
+        <div class="empty-pills">
+          <span class="feature-pill">📅 Auto-calculated Late Fees</span>
+          <span class="feature-pill">🎯 Eligibility Filter</span>
+          <span class="feature-pill">✅ Interactive Checklist</span>
+          <span class="feature-pill">⚠️ Missing Info Warnings</span>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div id="state-loading" class="state-container state-loading" style="display: none;">
+        <div class="spinner-container">
+          <div class="spinner"></div>
+          <div class="spinner-core">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </div>
+        </div>
+        <h3 class="state-title">Decoding Circular Legalese...</h3>
+        <p id="loading-step-text" class="state-text">Scanning for deadlines, fines, and eligibility clauses...</p>
+        <div class="progress-bar-wrapper">
+          <div id="loading-progress" class="progress-bar-fill"></div>
+        </div>
+      </div>
+
+      <!-- Error State -->
+      <div id="state-error" class="state-container state-error" style="display: none;">
+        <div class="error-icon" aria-hidden="true">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+        <h3 class="state-title">Notice Too Short or Unclear</h3>
+        <p id="error-message" class="state-text">Please paste at least a paragraph of circular text with relevant information to analyze.</p>
+        <button type="button" id="btn-error-sample" class="btn btn-secondary btn-sm">
+          Load Sample Notice Instead
+        </button>
+      </div>
+
+      <!-- Results Display Container -->
+      <div id="state-results" class="results-content" style="display: none;">
+        <!-- Results Header Banner -->
+        <div class="results-meta-banner">
+          <div class="meta-left">
+            <span id="result-type-badge" class="tag-badge tag-notice-type">Exam Notice</span>
+            <span id="result-urgency-badge" class="tag-badge tag-urgency">Urgency: High</span>
+            <span id="result-source-indicator" class="tag-badge tag-source">Demo Verified</span>
+          </div>
+          <div class="meta-right">
+            <!-- Language Quick Switcher in Results -->
+            <div class="inline-lang-toggle" title="Switch language view without re-running">
+              <span class="inline-lang-label">View in:</span>
+              <button type="button" class="inline-lang-btn active" data-lang="english">🇬🇧 English</button>
+              <button type="button" class="inline-lang-btn" data-lang="hinglish">🇮🇳 Hinglish</button>
+            </div>
+            <button type="button" id="btn-copy-summary" class="btn-icon-text" title="Copy clean WhatsApp summary">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              <span>Share to WhatsApp</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 1. The Immediate "Do This First" Callout Banner -->
+        <div class="next-step-highlight">
+          <div class="next-step-badge">🚀 DO THIS FIRST (NEXT STEP)</div>
+          <p id="result-immediate-action" class="next-step-text">Actionable next step will appear here...</p>
+        </div>
+
+        <!-- 2. Executive Summary Card -->
+        <div class="result-card">
+          <div class="result-card-header">
+            <div class="card-title-wrap">
+              <span class="card-icon icon-summary">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+              </span>
+              <h3 class="card-title">1. Plain-Language Summary</h3>
+            </div>
+          </div>
+          <div class="result-card-body">
+            <p id="result-summary" class="summary-paragraph">Summary will appear here...</p>
+            <div id="result-key-takeaways" class="bullet-list-container">
+              <!-- Bullet items injected here -->
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Important Dates & Deadlines Card -->
+        <div class="result-card">
+          <div class="result-card-header">
+            <div class="card-title-wrap">
+              <span class="card-icon icon-calendar">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              </span>
+              <h3 id="card-dates-title" class="card-title">2. Dates, Schedule &amp; Deadlines</h3>
+            </div>
+            <span id="dates-header-note" class="header-note">Timing from notice</span>
+          </div>
+          <div class="result-card-body">
+            <div id="result-dates-timeline" class="timeline-grid">
+              <!-- Timeline cards injected dynamically -->
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. Eligibility Criteria Card -->
+        <div class="result-card">
+          <div class="result-card-header">
+            <div class="card-title-wrap">
+              <span class="card-icon icon-eligibility">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              </span>
+              <h3 class="card-title">3. Eligibility &amp; Criteria</h3>
+            </div>
+          </div>
+          <div class="result-card-body">
+            <div class="eligibility-container">
+              <div class="eligibility-column col-eligible">
+                <div class="eligibility-header eligible-title">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  <span>Who is Eligible:</span>
+                </div>
+                <ul id="result-eligible-list" class="checklist-unstyled">
+                  <!-- Eligible points -->
+                </ul>
+              </div>
+
+              <div class="eligibility-column col-ineligible">
+                <div class="eligibility-header ineligible-title">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                  <span>Disqualifications / Not Eligible:</span>
+                </div>
+                <ul id="result-ineligible-list" class="checklist-unstyled">
+                  <!-- Disqualified points -->
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. Required Documents Card -->
+        <div class="result-card">
+          <div class="result-card-header">
+            <div class="card-title-wrap">
+              <span class="card-icon icon-docs">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
+              </span>
+              <h3 id="card-docs-title" class="card-title">4. Required Documents &amp; Paperwork</h3>
+            </div>
+            <span id="docs-header-note" class="header-note">Verified from notice</span>
+          </div>
+          <div class="result-card-body">
+            <div id="result-documents-grid" class="doc-badge-grid">
+              <!-- Documents injected here -->
+            </div>
+          </div>
+        </div>
+
+        <!-- 6. Missing or Unclear Information (CRITICAL ZERO-HALLUCINATION GUARD) -->
+        <div class="result-card card-warning-guardrail">
+          <div class="result-card-header">
+            <div class="card-title-wrap">
+              <span class="card-icon icon-warning">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              </span>
+              <h3 class="card-title">5. ⚠️ Missing or Unclear in Notice (Never Hallucinated)</h3>
+            </div>
+            <span class="guardrail-badge">Zero-Hallucination Safe</span>
+          </div>
+          <div class="result-card-body">
+            <p id="guardrail-explanation-text" class="guardrail-explanation">
+              Critical contradictions, ambiguous timings, and missing logistics identified directly from this notice:
+            </p>
+            <div id="result-missing-info" class="missing-items-list">
+              <!-- Missing info items injected here -->
+            </div>
+          </div>
+        </div>
+
+        <!-- 7. Interactive Action Checklist -->
+        <div class="result-card checklist-card">
+          <div class="result-card-header">
+            <div class="card-title-wrap">
+              <span class="card-icon icon-checklist">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+              </span>
+              <h3 class="card-title">6. Student Action Checklist (Interactive)</h3>
+            </div>
+            <div class="progress-pill">
+              <span id="checklist-completed-count">0</span> / <span id="checklist-total-count">0</span> Done (<span id="checklist-percent">0%</span>)
+            </div>
+          </div>
+          <div class="result-card-body">
+            <div class="checklist-progress-bar">
+              <div id="checklist-progress-fill" class="checklist-progress-fill" style="width: 0%;"></div>
+            </div>
+            <div id="result-interactive-checklist" class="interactive-checklist">
+              <!-- Interactive checklist tasks injected dynamically -->
+            </div>
+            <div class="checklist-actions-footer">
+              <button type="button" id="btn-reset-checklist" class="btn-text">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 2v6h6"/><path d="M21 12A9 9 0 0 0 6 5.3L3 8"/></svg>
+                Reset Checklist
+              </button>
+              <button type="button" id="btn-print-checklist" class="btn btn-secondary btn-sm">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                Print / Save Checklist
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <div class="footer-container">
+      <div class="footer-left">
+        <strong>CampusSaarthi AI</strong> • Built for Indian College &amp; University Students • Education &amp; Student Life Track
+      </div>
+      <div class="footer-right">
+        <span>No API key required in demo mode</span> •
+        <a href="#notice-form" class="footer-link">Back to top ↑</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <!-- Scripts -->
+  <script src="script.js"></script>
+</body>
+</html>
